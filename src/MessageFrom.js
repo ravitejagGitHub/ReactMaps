@@ -2,22 +2,21 @@ import React, { Component } from 'react';
 import { Card, CardTitle, CardText } from 'reactstrap';
 import { Button, Form, FormGroup, Label, Input } from 'reactstrap';
 
-
 class MessageForm extends Component {
-    
-    handleFieldChange= (event) => {
+
+    handleFieldChange = (event) => {
         const { name, value } = event.target;
         this.props.updateUserDetails({
             [name]: value
         });
     }
-    onUserFormSubmit = (event)=>{
+    onUserFormSubmit = (event) => {
         event.preventDefault();
         console.log(this.state);
+        this.props.submitUserDetails();
     }
 
     render() {
-        let state = this.props.state;
         return (
             <Card body className="message-form">
                 <CardTitle>Welcome to Raviteja-Maps</CardTitle>
@@ -43,7 +42,7 @@ class MessageForm extends Component {
                         />
                     </FormGroup>
 
-                    <Button type="submit" color="info" disabled={!state.isUserLocated} >Submit</Button>
+                    <Button type="submit" color="info" disabled={!this.props.isFormValid()} >Submit</Button>
                 </Form>
             </Card>
         );
