@@ -4,12 +4,12 @@ import MessageForm from './MessageFrom';
 import Joi from 'joi';
 import './App.css';
 
-const API_URL = window.location.hostname === "localhost" ? "http://localhost:9000/Message" : "prod_url";
+const API_CREATE_MESSAGE_URL = window.location.hostname === "localhost" ? "http://localhost:9000/Message" : "prod_url";
 
 
 
 const userDetailsSchema = Joi.object().keys({
-  name: Joi.string().regex(/^[A-Za-z\d\-_\s]{6,100}$/).min(3).max(30).required(),
+  name: Joi.string().regex(/^[A-Za-z\d\-_\s]{3,100}$/).min(3).max(30).required(),
   message: Joi.string().min(1).max(500).required()
 })
 
@@ -22,7 +22,10 @@ class App extends Component {
       lng: -0.09
     },
     isUserLocated: false,
-    zoom: 1,
+    zoom: 2,
+    messages: [],
+    sendingMessage: false,
+    sentMessage: false
   };
 
   isFormValid = () => {
@@ -41,14 +44,22 @@ class App extends Component {
         lng: location.lng
       },
       isUserLocated: true,
-      zoom: 15
+      zoom: 9,
     });
   };
 
+  updateMessages = (messages) => {
+    this.setState({
+      messages
+    });
+  }
   submitUserDetails = () => {
 
     if (this.isFormValid()) {
-      fetch(API_URL, {
+      this.setState({
+        sendingMessage: true,
+      });
+      fetch(API_CREATE_MESSAGE_URL, {
         method: "POST",
         headers: {
           "content-type": "application/json"
@@ -62,20 +73,40 @@ class App extends Component {
       }).then(res => res.json())
         .then(message => {
           console.log(message);
-        }).catch(err => console.error(err))
-    }
+          this.setState({
+            sentMessage: true
+          });
+        }).catch(err => {
+          console.error(err);
+          this.setState({
+            sentMessage: false
+          });
+        })
+        .finally(() => {
+          setTimeout(() => {
+            this.setState({
+              sendingMessage: false,
+            });
+          }, 1000);
 
+        })
+    }
   }
+
   updateUserDetails = (userDetails) => {
     this.setState(userDetails);
   };
   render() {
     return (
       <div className="App">
-        <MapComponent onUserLocated={this.onUserLocated} state={this.state} />
-        <MessageForm state={this.state} updateUserDetails={this.updateUserDetails}
+        <MapComponent state={this.state}
+          onUserLocated={this.onUserLocated}
+          updateMessages={this.updateMessages} />
+        <MessageForm state={this.state}
+          updateUserDetails={this.updateUserDetails}
           submitUserDetails={this.submitUserDetails}
-          isFormValid={this.isFormValid} />
+          isFormValid={this.isFormValid}
+        />
       </div>
     );
   }
