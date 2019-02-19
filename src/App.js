@@ -49,6 +49,18 @@ class App extends Component {
   };
 
   updateMessages = (messages) => {
+    const keys = {};
+    messages = messages.reduce((all, message)=>{
+      const key = `${message.latitude}${message.longitude}`;
+      if(keys[key]) {
+        keys[key].otherMessages = keys[key].otherMessages || [];
+        keys[key].otherMessages.push(message);
+      } else {
+        keys[key] = message;
+        all.push(message);
+      }
+      return all;
+    }, [])
     this.setState({
       messages
     });
